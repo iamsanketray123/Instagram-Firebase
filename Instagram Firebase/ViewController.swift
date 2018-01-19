@@ -114,8 +114,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
             guard let image = self.plusPhotoButton.imageView?.image else { return }
             guard let uploadData = UIImageJPEGRepresentation(image, 0.3) else { return }
- 
-            Storage.storage().reference().child("profile_images").putData(uploadData, metadata: nil, completion: { (metadata, err) in
+            let fileName = NSUUID().uuidString
+            
+            Storage.storage().reference().child("profile_images").child(fileName).putData(uploadData, metadata: nil, completion: { (metadata, err) in
                 if let err = err {
                     print("Failed to upload profile image:", err)
                     return
@@ -123,19 +124,18 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                 guard let profileImageUrl = metadata?.downloadURL()?.absoluteString else { return }
             
                 print("Successfully uploaded profile Image:", profileImageUrl)
-            })
-            
+                guard let uid = user?.uid else { return }
+                let dictionaryValues = ["username": username,"profileImageUrl": profileImageUrl]
+                
+                Database.database().reference().child("users").child(uid).updateChildValues(dictionaryValues, withCompletionBlock: { (error, ref) in
+                    if let error = error {
+                        print("Error saving user details to DB:", error)
+                        return
+                    }
+                    print("successfully updated user details to Firebase databse")
+                })
 
-//            guard let uid = user?.uid else { return }
-//            let values = ["username": username]
-//
-//            Database.database().reference().child("users").child(uid).updateChildValues(values, withCompletionBlock: { (error, ref) in
-//                if let error = error {
-//                    print("Error saving user details to DB:", error)
-//                    return
-//                }
-//                print("successfully updated user details to Firebase databse")
-//            })
+            })
         }
     }
     
