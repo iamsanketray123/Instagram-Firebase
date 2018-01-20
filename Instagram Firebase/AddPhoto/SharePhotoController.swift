@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Firebase
 
 class SharePhotoController: UIViewController {
 
@@ -50,9 +51,53 @@ class SharePhotoController: UIViewController {
         textView.anchor(top: containerView.topAnchor, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
     }
     @objc func handleShare(){
+        guard let caption = textView.text, caption.count > 0 else { return }
+        guard let image = imageView.image else { return }
+        guard let uploadData = UIImageJPEGRepresentation(image, 0.5) else { return }
         
+        navigationItem.rightBarButtonItem?.isEnabled = false
+        let fileName = NSUUID().uuidString
+        Storage.storage().reference().child("posts").child(fileName).putData(uploadData, metadata: nil) { (metadata, err) in
+            if let err = err {
+                self.navigationItem.rightBarButtonItem?.isEnabled = true
+                print("Failed to upload post image:" , err)
+                return
+            }
+            guard let imageUrl = metadata?.downloadURL()?.absoluteString else { return }
+            print("Successfully uploaded image to Fierbase Storage:", imageUrl)
+            
+            self.saveToDatabaseWithImageUrl(imageUrl: imageUrl)
+        }
     }
+
+    fileprivate func saveToDatabaseWithImageUrl(imageUrl: String) {
+        guard let caption = textView.text else { return }
+        guard let postImage = imageView.image else { return }
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        let userPostRef = Database.database().reference().child("posts").child(uid)
+        let ref = userPostRef.childByAutoId()
+        let values = ["imageUrl" : imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": Date().timeIntervalSince1970] as [String: Any]
+        ref.updateChildValues(values) { (err, ref) in
+            if let err = err {
+                print("Failed to save post to DB:", err)
+                self.navigationItem.rightBarButtonItem?.isEnabled = true
+                return
+            }
+            print("Successfully saved post to DB 🥕🥕🥕")
+            self.dismiss(animated: true, completion: nil)
+        }
+    }
+    
     override var prefersStatusBarHidden: Bool {
         return true
     }
 }
+
+
+
+
+
+
+
+
+
