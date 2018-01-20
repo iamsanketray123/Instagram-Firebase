@@ -16,6 +16,7 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
     var images = [UIImage]()
     var selectedImage : UIImage?
     var assets = [PHAsset]()
+    var header : PhotoSelectorHeader?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,6 +75,7 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerId, for: indexPath) as! PhotoSelectorHeader
 //        header.photoImageView.image = selectedImage
+        self.header = header
         
         if let selectedImage = selectedImage {
             if let index = self.images.index(of: selectedImage) {
@@ -124,7 +126,9 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
         dismiss(animated: true)
     }
     @objc func handleNext() {
-        print("Handling Next")
+        let sharedPhotoController = SharePhotoController()
+        sharedPhotoController.imageView.image = header?.photoImageView.image
+        navigationController?.pushViewController(sharedPhotoController, animated: true)
     }
     override var prefersStatusBarHidden: Bool {
         return true
