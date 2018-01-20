@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  SignUpController.swift
 //  Instagram Firebase
 //
 //  Created by Sanket  Ray on 18/01/18.
@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     let plusPhotoButton : UIButton = {
         let button = UIButton(type : .system)
@@ -51,6 +51,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         tf.borderStyle = .roundedRect
         tf.keyboardType = .emailAddress
         tf.autocorrectionType = .no
+        tf.autocapitalizationType = .none
         tf.addTarget(self, action: #selector(handleTextInputChange), for: .editingChanged)
         return tf
     }()
@@ -133,19 +134,36 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                         return
                     }
                     print("successfully updated user details to Firebase databse")
+                    guard let mainTabBarController = UIApplication.shared.keyWindow?.rootViewController as? MainTabBarController else { return }
+                    mainTabBarController.setupViewControllers()
+                    self.dismiss(animated: true, completion : nil)
                 })
 
             })
         }
     }
+    let alreadyHaveAccountButton : UIButton = {
+        let button = UIButton(type: .system)
+        let attributedTitle = NSMutableAttributedString(string: "Already have an account?  ", attributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 14), NSAttributedStringKey.foregroundColor: UIColor.lightGray])
+        attributedTitle.append(NSAttributedString(string: "Sign In", attributes: [NSAttributedStringKey.foregroundColor: UIColor.rgb(17, 154, 237), NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: 14)]))
+        button.setAttributedTitle(attributedTitle, for: .normal)
+        button.addTarget(self, action: #selector(handleAlreadyHaveAccount), for: .touchUpInside)
+        return button
+    }()
+    
+    @objc func handleAlreadyHaveAccount() {
+        _ = navigationController?.popViewController(animated: true)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        view.backgroundColor = .white
         view.addSubview(plusPhotoButton)
+        view.addSubview(alreadyHaveAccountButton)
         plusPhotoButton.anchor(top: view.topAnchor, left: nil, bottom: nil, right: nil, paddingTop: 40, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 140, height: 140)
         plusPhotoButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         
+        alreadyHaveAccountButton.anchor(top: nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
 //        plusPhotoButton.heightAnchor.constraint(equalToConstant: 140).isActive = true
 //        plusPhotoButton.widthAnchor.constraint(equalToConstant: 140).isActive = true
 //        plusPhotoButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 40).isActive = true
@@ -168,8 +186,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 //            ])
         stackView.anchor(top: plusPhotoButton.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 20, paddingLeft: 40, paddingBottom: 0, paddingRight: 40, width: 0, height: 200)
     }
+    
 }
-
 
 
 
