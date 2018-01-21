@@ -12,6 +12,7 @@ import Firebase
 class UserProfileController : UICollectionViewController, UICollectionViewDelegateFlowLayout {
 
     var posts = [Post]()
+    var user : User?
     override func viewDidLoad() {
         super.viewDidLoad()
     
@@ -23,24 +24,23 @@ class UserProfileController : UICollectionViewController, UICollectionViewDelega
         collectionView?.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: "cellId")
         
         setupLogOutButton()
-        fetchPosts()
+        fetchOrderedPosts()
     }
     
-    fileprivate func fetchPosts() {
+    fileprivate func fetchOrderedPosts() {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         let ref = Database.database().reference().child("posts").child(uid)
-        ref.observeSingleEvent(of: .value, with: { (snapshot) in
-            guard let dictionaries = snapshot.value as? [String: Any] else { return }
-            dictionaries.forEach({ (key, value) in
-                guard let dictionary = value as? [String: Any] else { return }
-                let post = Post(dictionary: dictionary)
-                self.posts.append(post)
-            })
+        ref.queryOrdered(byChild: "creationDate").observe(.childAdded, with: { (snapshot) in
+            guard let dictionary = snapshot.value as? [String: Any] else { return }
+            
+            guard let user = self.user else { return }
+            let post = Post(user: user, dictionary: dictionary)
+            
+            self.posts.insert(post, at: 0) //This allows to display the latest post, first!
             
             self.collectionView?.reloadData()
-            
         }) { (err) in
-                print("Failed to fetch posts:", err)
+            print("Failed to fetch ordered posts:", err)
         }
     }
     
@@ -94,31 +94,17 @@ class UserProfileController : UICollectionViewController, UICollectionViewDelega
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: view.frame.width, height: 200)
     }
-    var user : User?
+    
     fileprivate func fetchUser() {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-        Database.database().reference().child("users").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
-            guard let dictionary = snapshot.value as?  [String: Any] else { return }
-            self.user = User(dictionary: dictionary)
+        Database.fetchUserWithUID(uid: uid) { (user) in
+            self.user = user
             self.navigationItem.title = self.user?.username
-       
             self.collectionView?.reloadData()
-        }) { (error) in
-                print("Error fetching data from firebase:" , error)
-                return
         }
     }
 }
 
-struct User {
-    let username: String
-    let profileImageUrl : String
-    
-    init(dictionary: [String: Any]) {
-        self.username = dictionary["username"] as? String ?? ""
-        self.profileImageUrl = dictionary["profileImageUrl"] as? String ?? ""
-    }
-}
 
 
 

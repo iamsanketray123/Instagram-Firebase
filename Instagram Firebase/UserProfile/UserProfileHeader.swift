@@ -12,13 +12,15 @@ class UserProfileHeader : UICollectionViewCell {
 
     var user: User? {
         didSet{
-            setupProfileImage()
+            guard let profileImageUrl = user?.profileImageUrl else { return }
+            profileImageView.loadImage(urlString: profileImageUrl)
+//            setupProfileImage()
             usernameLabel.text = user?.username
         }
     }
     
-    let profileImageView: UIImageView = {
-        let iv = UIImageView()
+    let profileImageView: CustomImageView = {
+        let iv = CustomImageView()
         iv.layer.borderColor = UIColor.lightGray.cgColor
         iv.layer.borderWidth = 0.2
         return iv
@@ -137,20 +139,20 @@ class UserProfileHeader : UICollectionViewCell {
     }
 
     
-    fileprivate func setupProfileImage() {
-        guard let profileImageUrl = user?.profileImageUrl else { return }
-        guard let url = URL(string: profileImageUrl) else { return }
-        URLSession.shared.dataTask(with: url) { (data, response, error) in
-            if let error = error {
-                print("Error downloading image from Firebase:", error)
-                return
-            }
-            guard let data = data else { return }
-            DispatchQueue.main.async {
-                self.profileImageView.image = UIImage(data: data)
-            }
-        }.resume()
-    }
+//    fileprivate func setupProfileImage() {
+//        guard let profileImageUrl = user?.profileImageUrl else { return }
+//        guard let url = URL(string: profileImageUrl) else { return }
+//        URLSession.shared.dataTask(with: url) { (data, response, error) in
+//            if let error = error {
+//                print("Error downloading image from Firebase:", error)
+//                return
+//            }
+//            guard let data = data else { return }
+//            DispatchQueue.main.async {
+//                self.profileImageView.image = UIImage(data: data)
+//            }
+//        }.resume()
+//    }
 }
 
 
