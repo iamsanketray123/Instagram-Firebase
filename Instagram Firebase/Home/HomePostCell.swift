@@ -10,6 +10,7 @@ import UIKit
 
 protocol HomePostCellDelegate {
     func didTapComment(post : Post)
+    func didLike(for cell: HomePostCell)
 }
 
 class HomePostCell : UICollectionViewCell {
@@ -20,6 +21,7 @@ class HomePostCell : UICollectionViewCell {
         didSet {
             guard let url = post?.imageUrl else { return }
             photoImageView.loadImage(urlString: url)
+            likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
             
             usernameLabel.text = post?.user.username
             guard let profileImageUrl = post?.user.profileImageUrl else { return }
@@ -62,11 +64,15 @@ class HomePostCell : UICollectionViewCell {
         button.setTitleColor(.black, for: .normal)
         return button
     }()
-    let likeButton : UIButton = {
+    lazy var likeButton : UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleLike), for: .touchUpInside)
         return button
     }()
+    @objc func handleLike() {
+        delegate?.didLike(for: self)
+    }
 //    Need to use lazy var here else addTarget method wont work 🤔
     lazy var commentButton : UIButton = {
         let button = UIButton(type: .system)

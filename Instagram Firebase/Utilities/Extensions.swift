@@ -12,6 +12,9 @@ extension UIColor {
    static func rgb(_ red : CGFloat,_ green: CGFloat,_ blue: CGFloat) -> UIColor {
         return UIColor(red: red/255, green: green/255, blue: blue/255, alpha: 1.0)
     }
+    static func mainBlue() -> UIColor {
+        return UIColor.rgb(17,154,237)
+    }
 }
 extension UIView {
     func anchor(top : NSLayoutYAxisAnchor?, left: NSLayoutXAxisAnchor?, bottom: NSLayoutYAxisAnchor?, right: NSLayoutXAxisAnchor?, paddingTop : CGFloat, paddingLeft : CGFloat, paddingBottom: CGFloat, paddingRight: CGFloat, width : CGFloat, height: CGFloat) {
