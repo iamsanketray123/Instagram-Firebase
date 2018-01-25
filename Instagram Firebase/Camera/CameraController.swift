@@ -9,7 +9,7 @@
 import UIKit
 import AVFoundation
 
-class CameraController: UIViewController, AVCapturePhotoCaptureDelegate {
+class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewControllerTransitioningDelegate {
 
     let dismissButton : UIButton = {
         let button = UIButton(type: .system)
@@ -31,9 +31,22 @@ class CameraController: UIViewController, AVCapturePhotoCaptureDelegate {
         super.viewDidLoad()
         view.backgroundColor = .white
         
+        transitioningDelegate = self
+        
         setupCaptureSession()
         setupHUD()
     }
+    let customAnimationPresentor = CustomAnimationPresentor()
+    let customAnimationDimisser = CustomAnimationDismisser()
+    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        
+        
+        return customAnimationPresentor
+    }
+    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return customAnimationDimisser
+    }
+    
     fileprivate func  setupHUD(){
         view.addSubview(capturePhotoButton)
         capturePhotoButton.anchor(top: nil, left: nil, bottom: view.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 24, paddingRight: 0, width: 80, height: 80)

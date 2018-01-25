@@ -13,6 +13,7 @@ struct Post {
     let user: User
     let caption : String
     let creationDate : Date
+    var id : String?
     
     init(user: User, dictionary : [String: Any]) {
         self.imageUrl = dictionary["imageUrl"] as? String ?? ""

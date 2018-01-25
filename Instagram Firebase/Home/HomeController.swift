@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout{
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate{
     
     let cellId = "cellId"
     var posts = [Post]()
@@ -70,7 +70,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             dictionaries.forEach({ (key, value) in
                 guard let dictionary = value as? [String: Any] else { return }
                 
-                let post = Post(user: user, dictionary: dictionary)
+                var post = Post(user: user, dictionary: dictionary)
+                post.id = key
                 self.posts.append(post)
             })
             self.posts.sort(by: { (p1, p2) -> Bool in
@@ -105,6 +106,13 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! HomePostCell
         cell.post = posts[indexPath.item]
+        cell.delegate = self
         return cell
+    }
+    func didTapComment(post: Post) {
+        print(post.caption)
+        let commentsController = CommentsController(collectionViewLayout: UICollectionViewFlowLayout())
+        commentsController.post = post
+        navigationController?.pushViewController(commentsController, animated: true)
     }
 }
